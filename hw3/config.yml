@@ -1,0 +1,13 @@
+capacity:
+  red: 5
+  green: 4
+  blue: 2
+max_seats: 89
+prices:
+  Monday: 10
+  Tuesday: 10
+  Wednesday: 10
+  Thursday: 10
+  Friday: 12
+  Saturday: 12
+  Sunday: 12

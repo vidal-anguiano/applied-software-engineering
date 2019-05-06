@@ -1,0 +1,4 @@
+sqlalchemy
+pyyaml
+inquirer
+psycopg2-binary
