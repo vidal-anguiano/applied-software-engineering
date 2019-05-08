@@ -14,6 +14,3 @@ class Tickets(Base):
     b_route = Column('b_route', String)
     status = Column('status', String)
     amnt_pd = Column('amnt_pd', Integer)
-
-
-

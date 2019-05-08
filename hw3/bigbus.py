@@ -35,39 +35,39 @@ class UserInt():
 
     def run(self):
         while UserInt._active:
-            aprompt = [inquirer.List('action',
-                                           message='What would you like to do?',
-                                           choices=['Sell',
-                                                    'Issue Refund',
-                                                    'Report',
-                                                    'Quit',])]
+            tag = 'action'
+            message = 'What would you like to do?'
+            choices = ['Sell',
+                       'Issue Refund',
+                       'Report',
+                       'Quit',]
 
-            arespon = inquirer.prompt(aprompt)['action']
+            run_command = list_prompt_and_response(tag, message, choices)
 
-            if arespon == 'Sell':
-                self._seller.ask_sell_date()
+            assert self.is_valid_command(run_command), "Not a valid command."
+
+            if run_command == 'Sell':
+                self._seller.ask_ride_date()
                 self._seller.s_bus()
                 self._seller.s_quant()
                 self._seller.s_name()
                 self._seller.ret_sel()
-                self._seller.wrt_tix(UserInt._dbsess)
+                self._seller.wrt_tix(self._dbsess)
 
-
-            if arespon == 'Issue Refund':
+            if run_command == 'Issue Refund':
                 self._refund.r_name()
                 self._refund.r_route()
                 self._refund.r_date()
                 self._refund.r_cnfrm()
-                self._refund.r_prces(UserInt._dbsess)
+                self._refund.r_prces(self._dbsess)
 
-
-            if arespon == 'Report':
+            if run_command == 'Report':
                 self._report.r_date()
-                self._report.gen_rpt(UserInt._dbsess)
+                self._report.gen_rpt(self._dbsess)
 
-
-            if arespon == 'Quit':
+            if run_command == 'Quit':
                 UserInt._active = False
+
 
     def is_valid_command(self, command):
         commands = ["Sell",
@@ -75,13 +75,6 @@ class UserInt():
                     "Report",
                     "Quit"]
         return command in commands
-
-def list_prompt_and_response(tag, message, choices):
-    prompt = [inquirer.List(tag,
-                            message,
-                            choices)]
-    response = inquirer.prompt(prompt)[tag]
-    return response
 
 
 class Seller():
@@ -93,10 +86,10 @@ class Seller():
         self.tix_qua = None
 
 
-    def s_date(self):
+    def ask_ride_date(self):
         tag = 'date'
         message = 'For which date would you like to sell a ticket?'
-        choices = get_10d()
+        choices = get_dates_10d_out()
         self.ride_date = list_prompt_and_response(tag, message, choices)
 
     def s_bus(self):
@@ -134,7 +127,7 @@ class Seller():
         ticket = self.tix[0]
         price = PRICES[wkday(ticket['ride_date'])]
         route = ticket['b_route'].lower()
-        dt_ride = ticket['ride_date']
+        ride_date = ticket['ride_date']
 
         if self._capcty(ride_date, route, dbsess):
             for ticket in self.tix:
@@ -229,11 +222,6 @@ class DBSess():
         return DBSess._dbsess
 
 
-def get_10d():
-    today = dt.datetime.today()
-    days = [(today + dt.timedelta(days=i)).strftime('%m-%d-%Y') for i in range(1,11)]
-    return days
-
 def wkday(dt_str):
     days = {0:'Monday',
             1:'Tuesday',
@@ -273,6 +261,20 @@ class Report():
               f"Ticket sales report for {self.dt_ride}:\n",
               "\n".join([str((i[1],i[0])) for i in counts]),
               '\n'*2)
+
+
+def list_prompt_and_response(tag, message, choices):
+    prompt = [inquirer.List(tag,
+                            message,
+                            choices)]
+    response = inquirer.prompt(prompt)[tag]
+    return response
+
+
+def get_dates_10d_out():
+    today = dt.datetime.today()
+    days = [(today + dt.timedelta(days=i)).strftime('%m-%d-%Y') for i in range(1,11)]
+    return days
 
 
 if __name__ == '__main__':
