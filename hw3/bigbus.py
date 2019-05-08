@@ -47,10 +47,7 @@ class UserInt():
             assert self.is_valid_command(run_command), "Not a valid command."
 
             if run_command == 'Sell':
-                self._seller.ask_ride_date()
-                self._seller.s_bus()
-                self._seller.s_quant()
-                self._seller.s_name()
+                self._seller.collect_ticket_sale_details()
                 self._seller.ret_sel()
                 self._seller.wrt_tix(self._dbsess)
 
@@ -82,36 +79,48 @@ class Seller():
     def __init__(self):
         self.today = dt.datetime.today().strftime('%m-%d-%Y')
         self.ride_date = None
-        self.bus_rte = None
-        self.tix_qua = None
+        self.bus_route = None
+        self.ticket_quant = None
+        self.rider_name = None
 
+    def collect_ticket_sale_details(self):
+        self.ride_date = self.ask_ride_date()
+        self.bus_route = self.ask_bus_route()
+        self.ticket_quant = self.ask_ticket_quant()
+        self.rider_name = self.ask_rider_name()
+
+    def provide_ticket_sale_details(self, details):
+        self.ride_date = details['ride_date']
+        self.bus_route = details['bus_route']
+        self.ticket_quant = details['ticket_quant']
+        self.rider_name = details['rider_name']
 
     def ask_ride_date(self):
         tag = 'date'
         message = 'For which date would you like to sell a ticket?'
         choices = get_dates_10d_out()
-        self.ride_date = list_prompt_and_response(tag, message, choices)
+        return list_prompt_and_response(tag, message, choices)
 
-    def s_bus(self):
+    def ask_bus_route(self):
         bprompt = [inquirer.List('bus',
                                  message='Which route would you like to ride?',
                                  choices=['Red',
                                           'Blue',
                                           'Green'])]
-        self.bus_rte = inquirer.prompt(bprompt)['bus']
+        return inquirer.prompt(bprompt)['bus']
 
 
-    def s_quant(self):
+    def ask_ticket_quant(self):
         qprompt = [inquirer.List('quant',
                                  message='How many tickets would you like to purchase?',
                                  choices=[1,2,3,4])]
-        self.tix_qua = inquirer.prompt(qprompt)['quant']
+        return inquirer.prompt(qprompt)['quant']
 
 
-    def s_name(self):
+    def ask_rider_name(self):
         nprompt = [inquirer.Text('name',
                                  message='Name of purchaser?')]
-        self.byr_nme = inquirer.prompt(nprompt)['name']
+        return inquirer.prompt(nprompt)['name']
 
 
     def ret_sel(self):

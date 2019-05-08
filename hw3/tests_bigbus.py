@@ -20,7 +20,11 @@ def test_date_select_within_10days():
 
 def test_get_ride_and_rider_info():
     seller = Seller()
-    seller.collect_ticket_sale_details()
+    details = {'ride_date': '07-01-2019',
+               'bus_route': 'red',
+               'ticket_quant': 2,
+               'rider_name': 'test_case'}
+    seller.provide_ticket_sale_details(details)
 
     assert seller.ride_date
     assert seller.bus_route
