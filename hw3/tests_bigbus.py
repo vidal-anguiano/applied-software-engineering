@@ -24,7 +24,7 @@ def test_get_ride_and_rider_info():
                'bus_route': 'red',
                'ticket_quant': 2,
                'rider_name': 'test_case'}
-    seller.provide_ticket_sale_details(details)
+    seller.collect_ticket_sale_details(test=True, details=details)
 
     assert seller.ride_date
     assert seller.bus_route

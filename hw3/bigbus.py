@@ -83,13 +83,15 @@ class Seller():
         self.ticket_quant = None
         self.rider_name = None
 
-    def collect_ticket_sale_details(self):
-        self.ride_date = self.ask_ride_date()
-        self.bus_route = self.ask_bus_route()
-        self.ticket_quant = self.ask_ticket_quant()
-        self.rider_name = self.ask_rider_name()
+    def collect_ticket_sale_details(self, test=False, details=None):
+        if test:
+            details = details
+        else:
+            details = {'ride_date': self.ask_ride_date(),
+                       'bus_route': self.ask_bus_route(),
+                       'ticket_quant': self.ask_ticket_quant(),
+                       'rider_name': self.ask_rider_name()}
 
-    def provide_ticket_sale_details(self, details):
         self.ride_date = details['ride_date']
         self.bus_route = details['bus_route']
         self.ticket_quant = details['ticket_quant']
