@@ -17,20 +17,21 @@ MAXSTS = CONFIG['max_seats']
 
 class UserInt():
     _instan = None
-    _seller = None
+    _active = None
 
     def __init__(self):
         '''Initializes singleton UserInt.'''
         if not UserInt._instan:
             UserInt._instan = self
             UserInt._active = True
-            UserInt._seller = Seller()
-            UserInt._refund = Refund()
-            UserInt._report = Report()
-            UserInt._dbsess = DBSess().getInstance()
+            self._seller = Seller()
+            self._refund = Refund()
+            self._report = Report()
+            self._dbsess = DBSess().getInstance()
 
         else:
             print("Already created a UserInt!")
+
 
     def run(self):
         while UserInt._active:
@@ -44,46 +45,59 @@ class UserInt():
             arespon = inquirer.prompt(aprompt)['action']
 
             if arespon == 'Sell':
-                UserInt._seller.s_date()
-                UserInt._seller.s_bus()
-                UserInt._seller.s_quant()
-                UserInt._seller.s_name()
-                UserInt._seller.ret_sel()
-                UserInt._seller.wrt_tix(UserInt._dbsess)
+                self._seller.ask_sell_date()
+                self._seller.s_bus()
+                self._seller.s_quant()
+                self._seller.s_name()
+                self._seller.ret_sel()
+                self._seller.wrt_tix(UserInt._dbsess)
 
 
             if arespon == 'Issue Refund':
-                UserInt._refund.r_name()
-                UserInt._refund.r_route()
-                UserInt._refund.r_date()
-                UserInt._refund.r_cnfrm()
-                UserInt._refund.r_prces(UserInt._dbsess)
+                self._refund.r_name()
+                self._refund.r_route()
+                self._refund.r_date()
+                self._refund.r_cnfrm()
+                self._refund.r_prces(UserInt._dbsess)
 
 
             if arespon == 'Report':
-                UserInt._report.r_date()
-                UserInt._report.gen_rpt(UserInt._dbsess)
+                self._report.r_date()
+                self._report.gen_rpt(UserInt._dbsess)
 
 
             if arespon == 'Quit':
                 UserInt._active = False
+
+    def is_valid_command(self, command):
+        commands = ["Sell",
+                    "Issue Refund",
+                    "Report",
+                    "Quit"]
+        return command in commands
+
+def list_prompt_and_response(tag, message, choices):
+    prompt = [inquirer.List(tag,
+                            message,
+                            choices)]
+    response = inquirer.prompt(prompt)[tag]
+    return response
 
 
 class Seller():
 
     def __init__(self):
         self.today = dt.datetime.today().strftime('%m-%d-%Y')
-        self.tix_dte = None
+        self.ride_date = None
         self.bus_rte = None
         self.tix_qua = None
 
 
     def s_date(self):
-        dprompt = [inquirer.List('date',
-                                 message='For which date would you like to ?',
-                                 choices=get_10d())]
-        self.tix_dte = inquirer.prompt(dprompt)['date']
-
+        tag = 'date'
+        message = 'For which date would you like to sell a ticket?'
+        choices = get_10d()
+        self.ride_date = list_prompt_and_response(tag, message, choices)
 
     def s_bus(self):
         bprompt = [inquirer.List('bus',
@@ -109,7 +123,7 @@ class Seller():
 
     def ret_sel(self):
         self.tix = [{'dt_sold': self.today,
-                     'dt_ride': self.tix_dte,
+                     'ride_date': self.ride_date,
                      'rdr_nme': self.byr_nme,
                      'b_route': self.bus_rte,
                      'status': 'Active'} for _ in range(self.tix_qua)]
@@ -118,15 +132,15 @@ class Seller():
     def wrt_tix(self, dbsess):
         num_tix = len(self.tix)
         ticket = self.tix[0]
-        price = PRICES[wkday(ticket['dt_ride'])]
+        price = PRICES[wkday(ticket['ride_date'])]
         route = ticket['b_route'].lower()
-        dt_ride = ticket['dt_ride']
+        dt_ride = ticket['ride_date']
 
-        if self._capcty(dt_ride, route, dbsess):
+        if self._capcty(ride_date, route, dbsess):
             for ticket in self.tix:
                 #price = PRICES[wkday(ticket['dt_ride'])]
                 dbsess.add(Tickets(dt_sold = ticket['dt_sold'],
-                                   dt_ride = ticket['dt_ride'],
+                                   dt_ride = ticket['ride_date'],
                                    rdr_nme = ticket['rdr_nme'],
                                    b_route = ticket['b_route'].lower(),
                                    status =  ticket['status'],
@@ -264,4 +278,3 @@ class Report():
 if __name__ == '__main__':
     userint = UserInt()
     userint.run()
-
