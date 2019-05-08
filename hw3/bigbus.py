@@ -97,26 +97,28 @@ class Seller():
         self.ticket_quant = details['ticket_quant']
         self.rider_name = details['rider_name']
 
+
     def ask_ride_date(self):
         tag = 'date'
         message = 'For which date would you like to sell a ticket?'
         choices = get_dates_10d_out()
         return list_prompt_and_response(tag, message, choices)
 
+
     def ask_bus_route(self):
-        bprompt = [inquirer.List('bus',
-                                 message='Which route would you like to ride?',
-                                 choices=['Red',
-                                          'Blue',
-                                          'Green'])]
-        return inquirer.prompt(bprompt)['bus']
+        tag = 'bus'
+        message = 'Which route would you like to ride?'
+        choices = ['Red',
+                   'Blue',
+                   'Green']
+        return list_prompt_and_response(tag, message, choices)
 
 
     def ask_ticket_quant(self):
-        qprompt = [inquirer.List('quant',
-                                 message='How many tickets would you like to purchase?',
-                                 choices=[1,2,3,4])]
-        return inquirer.prompt(qprompt)['quant']
+        tag = 'quant'
+        message = 'How many tickets would you like to purchase?'
+        choices = [1,2,3,4]
+        return list_prompt_and_response(tag, message, choices)
 
 
     def ask_rider_name(self):
