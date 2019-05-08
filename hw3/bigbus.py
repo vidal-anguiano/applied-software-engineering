@@ -48,8 +48,8 @@ class UserInt():
 
             if run_command == 'Sell':
                 self._seller.collect_ticket_sale_details()
-                self._seller.ret_sel()
-                self._seller.wrt_tix(self._dbsess)
+                self._seller.prepare_tickets()
+                self._seller.process_sale(self._dbsess)
 
             if run_command == 'Issue Refund':
                 self._refund.r_name()
@@ -135,15 +135,15 @@ class Seller():
                      'status': 'Active'} for _ in range(self.ticket_quant)]
 
 
-    def wrt_tix(self, dbsess):
-        num_tix = len(self.tix)
-        ticket = self.tix[0]
+    def process_sale(self, dbsess):
+        ticket_quant = len(self.tickets)
+        ticket = self.tickets[0]
         price = PRICES[wkday(ticket['ride_date'])]
-        route = ticket['b_route'].lower()
+        route = ticket['bus_route'].lower()
         ride_date = ticket['ride_date']
 
         if self._capcty(ride_date, route, dbsess):
-            for ticket in self.tix:
+            for ticket in self.tickets:
                 #price = PRICES[wkday(ticket['dt_ride'])]
                 dbsess.add(Tickets(dt_sold = ticket['dt_sold'],
                                    dt_ride = ticket['ride_date'],
