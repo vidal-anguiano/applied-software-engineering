@@ -41,7 +41,8 @@ def test_get_ride_and_rider_info():
 def test_create_tickets_from_sale_details():
     seller = Seller()
     details = EXAMPLE_SALES[0]
-    tickets = seller.prepare_tickets(details)
+    seller.collect_ticket_sale_details(test=True, details=details)
+    seller.prepare_tickets()
 
-    assert len(tickets) == details['ticket_quant']
-    assert tickets[0]['rider_name'] == details['rider_name']
+    assert len(seller.tickets) == details['ticket_quant']
+    assert seller.tickets[0]['rider_name'] == details['rider_name']

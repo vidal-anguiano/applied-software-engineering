@@ -127,12 +127,12 @@ class Seller():
         return inquirer.prompt(nprompt)['name']
 
 
-    def ret_sel(self):
-        self.tix = [{'dt_sold': self.today,
+    def prepare_tickets(self):
+        self.tickets = [{'dt_sold': self.today,
                      'ride_date': self.ride_date,
-                     'rdr_nme': self.byr_nme,
-                     'b_route': self.bus_rte,
-                     'status': 'Active'} for _ in range(self.tix_qua)]
+                     'rider_name': self.rider_name,
+                     'bus_route': self.bus_route,
+                     'status': 'Active'} for _ in range(self.ticket_quant)]
 
 
     def wrt_tix(self, dbsess):
