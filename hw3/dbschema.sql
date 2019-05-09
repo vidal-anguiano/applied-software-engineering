@@ -1,10 +1,10 @@
 DROP TABLE IF EXISTS ticket_sales;
 CREATE TABLE ticket_sales (
 t_id SERIAL PRIMARY KEY,
-dt_sold DATE,
-dt_ride DATE,
-rdr_nme VARCHAR(20),
+date_sold DATE,
+ride_date DATE,
+rider_name VARCHAR(20),
 bus_route VARCHAR(20),
 status VARCHAR(20),
-amnt_pd FLOAT
+amount_paid FLOAT
 );

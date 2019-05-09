@@ -57,8 +57,8 @@ class UserInt():
                 self._refund.process_refund(self._dbsess)
 
             if run_command == 'Report':
-                self._report.r_date()
-                self._report.gen_rpt(self._dbsess)
+                self._report.ask_ride_date()
+                self._report.generate_report(self._dbsess)
 
             if run_command == 'Quit':
                 UserInt._active = False
@@ -80,6 +80,7 @@ class Seller():
         self.bus_route = None
         self.ticket_quant = None
         self.rider_name = None
+
 
     def collect_ticket_sale_details(self, test=False, details=None):
         if test:
@@ -136,7 +137,7 @@ class Seller():
     def process_sale(self, dbsess):
         ticket_quant = len(self.tickets)
         ticket = self.tickets[0]
-        price = PRICES[wkday(ticket['ride_date'])]
+        price = PRICES[day_of_week(ticket['ride_date'])]
         route = ticket['bus_route'].lower()
         ride_date = ticket['ride_date']
 
@@ -190,7 +191,7 @@ class Refund():
         prompt = [inquirer.Text('name',
                                  message='What is the name listed on the ticket purchase?')]
 
-        self.rider_name = inquirer.prompt(prompt)['name']
+        return inquirer.prompt(prompt)['name']
 
 
     def ask_bus_route(self):
@@ -200,34 +201,63 @@ class Refund():
                                           'Blue',
                                           'Green'])]
 
-        self.bus_route = inquirer.prompt(prompt)['route'].lower()
+        return inquirer.prompt(prompt)['route'].lower()
 
 
     def ask_ride_date(self):
         prompt = [inquirer.Text('date',
                                  message='For which date were the tickets purchased?')]
+        return inquirer.prompt(prompt)['date']
 
-        self.ride_date = inquirer.prompt(prompt)['date']
 
-
-    def ask_to_confirm(self):
-
-        cprompt = [inquirer.Confirm('confirm', message=f'Process refund for {self.rdr_nme}\'s, tickets on the {self.b_route} route for {self.dt_ride}?')]
-        self.confirm = inquirer.prompt(cprompt)['confirm']
+    def ask_to_confirm(self, test=False):
+        if test:
+            self.confirm = 'y'
+        else:
+            prompt = [inquirer.Confirm('confirm', message=f'Process refund for {self.rider_name}\'s, tickets on the {self.bus_route} route for {self.ride_date}?')]
+            self.confirm = inquirer.prompt(prompt)['confirm']
 
 
     def process_refund(self, dbsess):
-        self.dt_ride = dt.datetime.strptime(self.dt_ride, '%m-%d-%Y').date()
+        self.ride_date = dt.datetime.strptime(self.ride_date, '%m-%d-%Y').date()
 
         if self.confirm:
             dbsess.query(Tickets)\
-                   .filter(Tickets.rdr_nme == self.rdr_nme)\
-                   .filter(Tickets.dt_ride == self.dt_ride)\
-                   .filter(Tickets.b_route == self.b_route)\
+                   .filter(Tickets.rider_name == self.rider_name)\
+                   .filter(Tickets.ride_date == self.ride_date)\
+                   .filter(Tickets.bus_route == self.bus_route)\
                    .filter(Tickets.status == 'Active')\
                    .update({Tickets.status: 'Refunded'}, synchronize_session='evaluate')
 
             dbsess.commit()
+
+
+class Report():
+    def __init__(self):
+        self.ride_date = None
+
+
+    def ask_ride_date(self):
+        prompt = [inquirer.Text('date',
+                                message='For which date do you want to generate a report?')]
+
+        self.ride_date = inquirer.prompt(prompt)['date']
+
+
+    def generate_report(self, dbsess):
+        self.ride_date = dt.datetime.strptime(self.ride_date, '%m-%d-%Y').date()
+
+        counts = dbsess.query(func.count(Tickets.t_id),
+                              Tickets.bus_route)\
+                       .filter(Tickets.ride_date == self.ride_date)\
+                       .filter(Tickets.status == 'Active')\
+                       .group_by(Tickets.bus_route)\
+                       .all()
+
+        print('\n'*2,
+              f"Ticket sales report for {self.ride_date}:\n",
+              "\n".join([str((i[1],i[0])) for i in counts]),
+              '\n'*2)
 
 
 class DBSess():
@@ -242,49 +272,9 @@ class DBSess():
         if not DBSess._dbsess:
             DBSess._dbsess =  self._sessionmaker()
 
+
     def getInstance(self):
         return DBSess._dbsess
-
-
-def wkday(dt_str):
-    days = {0:'Monday',
-            1:'Tuesday',
-            2:'Wednesday',
-            3:'Thursday',
-            4:'Friday',
-            5:'Saturday',
-            6:'Sunday'}
-
-    day = dt.datetime.strptime(dt_str, '%m-%d-%Y').weekday()
-
-    return days[day]
-
-
-class Report():
-    def __init__(self):
-        self.dt_ride = None
-
-
-    def r_date(self):
-        dprompt = [inquirer.Text('date',
-                                 message='For which date do you want to generate a report?')]
-
-        self.dt_ride = inquirer.prompt(dprompt)['date']
-
-    def gen_rpt(self, dbsess):
-        self.dt_ride = dt.datetime.strptime(self.dt_ride, '%m-%d-%Y').date()
-
-        counts = dbsess.query(func.count(Tickets.t_id),
-                              Tickets.b_route)\
-                       .filter(Tickets.dt_ride == self.dt_ride)\
-                       .filter(Tickets.status == 'Active')\
-                       .group_by(Tickets.b_route)\
-                       .all()
-
-        print('\n'*2,
-              f"Ticket sales report for {self.dt_ride}:\n",
-              "\n".join([str((i[1],i[0])) for i in counts]),
-              '\n'*2)
 
 
 def list_prompt_and_response(tag, message, choices):
@@ -299,6 +289,20 @@ def get_dates_10d_out():
     today = dt.datetime.today()
     days = [(today + dt.timedelta(days=i)).strftime('%m-%d-%Y') for i in range(1,11)]
     return days
+
+
+def day_of_week(dt_str):
+    days = {0:'Monday',
+            1:'Tuesday',
+            2:'Wednesday',
+            3:'Thursday',
+            4:'Friday',
+            5:'Saturday',
+            6:'Sunday'}
+
+    day = dt.datetime.strptime(dt_str, '%m-%d-%Y').weekday()
+
+    return days[day]
 
 
 if __name__ == '__main__':

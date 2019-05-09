@@ -60,9 +60,12 @@ def test_ticket_sale_processes_successfully():
     seller.prepare_tickets()
     seller.process_sale(dbsess)
 
+    ride_date = details['ride_date']
+    ride_date = dt.datetime.strptime(ride_date, '%m-%d-%Y').date()
+
     results = dbsess.query(Tickets)\
                     .filter(Tickets.rider_name == 'test_case')\
-                    .filter(Tickets.ride_date == '07-02-2019')\
+                    .filter(Tickets.ride_date == ride_date)\
                     .filter(Tickets.bus_route == 'blue')\
                     .all()
 
@@ -82,3 +85,23 @@ def test_get_refund_details():
     assert refund.rider_name
     assert refund.bus_route
     assert refund.ride_date
+
+
+def test_ticket_refund_processes_successfully():
+    refund = Refund()
+    details = EXAMPLE_SALES[1]
+    refund.collect_refund_details(test=True, details=details)
+    refund.ask_to_confirm(test=True)
+    refund.process_refund(dbsess)
+
+    ride_date = details['ride_date']
+    ride_date = dt.datetime.strptime(ride_date, '%m-%d-%Y').date()
+
+    results = dbsess.query(Tickets)\
+                    .filter(Tickets.rider_name == 'test_case')\
+                    .filter(Tickets.ride_date == ride_date)\
+                    .filter(Tickets.bus_route == 'blue')\
+                    .filter(Tickets.status == 'Refunded')\
+                    .all()
+
+    assert len(results) % 4 == 0

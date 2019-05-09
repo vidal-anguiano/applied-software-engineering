@@ -8,9 +8,9 @@ class Tickets(Base):
     __tablename__ = 'ticket_sales'
 
     t_id = Column('t_id', Integer, primary_key=True)
-    dt_sold = Column('dt_sold', Date)
-    dt_ride = Column('dt_ride', Date)
-    rdr_nme = Column('rdr_nme', String)
-    b_route = Column('b_route', String)
+    date_sold = Column('date_sold', Date)
+    ride_date = Column('ride_date', Date)
+    rider_name = Column('rider_name', String)
+    bus_route = Column('bus_route', String)
     status = Column('status', String)
-    amnt_pd = Column('amnt_pd', Integer)
+    amount_paid = Column('amount_paid', Integer)
