@@ -170,42 +170,55 @@ class Seller():
 class Refund():
 
     def __init__(self):
-        self.rdr_nme = None
-        self.b_route = None
-        self.dt_ride = None
+        self.rider_name = None
+        self.bus_route = None
+        self.ride_date = None
         self.confirm = None
 
-    def r_name(self):
-        nprompt = [inquirer.Text('name',
+
+    def collect_refund_details(self, test=False, details=None):
+        if test:
+            details = details
+        else:
+            details = {'rider_name': self.ask_rider_name(),
+                       'bus_route': self.ask_bus_route(),
+                       'ride_date': self.ask_ride_date()}
+        self.rider_name = details['rider_name']
+        self.bus_route = details['bus_route']
+        self.ride_date = details['ride_date']
+
+
+    def ask_rider_name(self):
+        prompt = [inquirer.Text('name',
                                  message='What is the name listed on the ticket purchase?')]
 
-        self.rdr_nme = inquirer.prompt(nprompt)['name']
+        self.rider_name = inquirer.prompt(prompt)['name']
 
 
-    def r_route(self):
-        rprompt = [inquirer.List('route',
+    def ask_bus_route(self):
+        prompt = [inquirer.List('route',
                                  message='Which route did you buy your tickets for?',
                                  choices=['Red',
                                           'Blue',
                                           'Green'])]
 
-        self.b_route = inquirer.prompt(rprompt)['route'].lower()
+        self.bus_route = inquirer.prompt(prompt)['route'].lower()
 
-    def r_date(self):
-        dprompt = [inquirer.Text('date',
+
+    def ask_ride_date(self):
+        prompt = [inquirer.Text('date',
                                  message='For which date were the tickets purchased?')]
 
-        self.dt_ride = inquirer.prompt(dprompt)['date']
+        self.ride_date = inquirer.prompt(prompt)['date']
 
 
-    def r_cnfrm(self):
+    def ask_to_confirm(self):
 
         cprompt = [inquirer.Confirm('confirm', message=f'Process refund for {self.rdr_nme}\'s, tickets on the {self.b_route} route for {self.dt_ride}?')]
-
         self.confirm = inquirer.prompt(cprompt)['confirm']
 
 
-    def r_prces(self, dbsess):
+    def process_refund(self, dbsess):
         self.dt_ride = dt.datetime.strptime(self.dt_ride, '%m-%d-%Y').date()
 
         if self.confirm:

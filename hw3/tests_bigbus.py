@@ -32,7 +32,7 @@ def test_date_select_within_10days():
     assert next_day in next_10_days
 
 
-def test_get_ride_and_rider_info():
+def test_get_ride_and_rider_details():
     seller = Seller()
     details = EXAMPLE_SALES[0]
     seller.collect_ticket_sale_details(test=True, details=details)
@@ -72,3 +72,12 @@ def test_ticket_sale_processes_successfully():
     assert ticket.rider_name == 'test_case'
     assert ticket.ride_date == dt.datetime.strptime('07-02-2019', '%m-%d-%Y').date()
     assert ticket.bus_route == 'blue'
+
+
+def test_get_refund_details():
+    refund = Refund()
+    refund.collect_refund_details(test=True, details=details)
+
+    assert refund.rider_name
+    assert refund.bus_route
+    assert refund.ride_date
