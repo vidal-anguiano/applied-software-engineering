@@ -60,7 +60,7 @@ def test_ticket_sale_processes_successfully():
     seller.prepare_tickets()
     seller.process_sale(dbsess)
 
-    results = dbsess.query(Ticket)\
+    results = dbsess.query(Tickets)\
                     .filter(Tickets.rider_name == 'test_case')\
                     .filter(Tickets.ride_date == '07-02-2019')\
                     .filter(Tickets.bus_route == 'blue')\

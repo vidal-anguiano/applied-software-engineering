@@ -128,7 +128,7 @@ class Seller():
 
 
     def prepare_tickets(self):
-        self.tickets = [{'dt_sold': self.today,
+        self.tickets = [{'date_sold': self.today,
                      'ride_date': self.ride_date,
                      'rider_name': self.rider_name,
                      'bus_route': self.bus_route,
@@ -145,22 +145,22 @@ class Seller():
         if self._capcty(ride_date, route, dbsess):
             for ticket in self.tickets:
                 #price = PRICES[wkday(ticket['dt_ride'])]
-                dbsess.add(Tickets(dt_sold = ticket['dt_sold'],
-                                   dt_ride = ticket['ride_date'],
-                                   rdr_nme = ticket['rdr_nme'],
-                                   b_route = ticket['b_route'].lower(),
+                dbsess.add(Tickets(date_sold = ticket['date_sold'],
+                                   ride_date = ticket['ride_date'],
+                                   rider_name = ticket['rider_name'],
+                                   bus_route = ticket['bus_route'].lower(),
                                    status =  ticket['status'],
-                                   amnt_pd = price if num_tix < 4 else price*.9))
+                                   amount_paid = price if ticket_quant < 4 else price*.9))
                 dbsess.commit()
         else:
             print(f"I'm sorry, there are no longer any seats available on the {route} route.")
 
 
-    def _capcty(self, dt_ride, route, dbsess):
-        dt_sold = dt.datetime.strptime(dt_ride, '%m-%d-%Y').date()
+    def _capcty(self, ride_date, route, dbsess):
+        dt_sold = dt.datetime.strptime(ride_date, '%m-%d-%Y').date()
         res = dbsess.query(func.count(Tickets.t_id))\
                     .filter(Tickets.status == 'Active')\
-                    .filter(Tickets.dt_ride == dt_ride)\
+                    .filter(Tickets.ride_date == ride_date)\
                     .all()
         tixsold = res[0][0]
 
