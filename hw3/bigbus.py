@@ -12,8 +12,8 @@ from bigbus_orm import Tickets
 CONFIG = yaml.safe_load(open('./config.yml','r'))
 
 PRICES = CONFIG['prices']
-CAPCTY = CONFIG['capacity']
-MAXSTS = CONFIG['max_seats']
+CAPACITY = CONFIG['capacity']
+MAXSEATS = CONFIG['max_seats']
 
 class UserInt():
     _instan = None
@@ -142,7 +142,7 @@ class Seller():
         route = ticket['bus_route'].lower()
         ride_date = ticket['ride_date']
 
-        if self._capcty(ride_date, route, dbsess):
+        if self._at_capacity(ride_date, route, dbsess):
             for ticket in self.tickets:
                 #price = PRICES[wkday(ticket['dt_ride'])]
                 dbsess.add(Tickets(date_sold = ticket['date_sold'],
@@ -156,15 +156,15 @@ class Seller():
             print(f"I'm sorry, there are no longer any seats available on the {route} route.")
 
 
-    def _capcty(self, ride_date, route, dbsess):
-        dt_sold = dt.datetime.strptime(ride_date, '%m-%d-%Y').date()
-        res = dbsess.query(func.count(Tickets.t_id))\
-                    .filter(Tickets.status == 'Active')\
-                    .filter(Tickets.ride_date == ride_date)\
-                    .all()
-        tixsold = res[0][0]
+    def _at_capacity(self, ride_date, route, dbsess):
+        date_sold = dt.datetime.strptime(ride_date, '%m-%d-%Y').date()
+        result = dbsess.query(func.count(Tickets.t_id))\
+                       .filter(Tickets.status == 'Active')\
+                       .filter(Tickets.ride_date == ride_date)\
+                       .all()
+        tickets_sold = result[0][0]
 
-        return tixsold < MAXSTS*CAPCTY[route]
+        return tickets_sold < MAXSEATS*CAPACITY[route]
 
 
 class Refund():
