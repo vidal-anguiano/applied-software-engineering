@@ -4,7 +4,7 @@ import pytest
 import psycopg2
 import sqlalchemy
 
-from bigbus import UserInt, Seller, DBSess, get_dates_10d_out
+from bigbus import UserInt, Seller, DBSess, Refund, get_dates_10d_out
 from bigbus_orm import Tickets
 
 EXAMPLE_SALES = [{'ride_date': '07-01-2019',
@@ -76,6 +76,7 @@ def test_ticket_sale_processes_successfully():
 
 def test_get_refund_details():
     refund = Refund()
+    details = EXAMPLE_SALES[1]
     refund.collect_refund_details(test=True, details=details)
 
     assert refund.rider_name

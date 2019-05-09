@@ -52,11 +52,9 @@ class UserInt():
                 self._seller.process_sale(self._dbsess)
 
             if run_command == 'Issue Refund':
-                self._refund.r_name()
-                self._refund.r_route()
-                self._refund.r_date()
-                self._refund.r_cnfrm()
-                self._refund.r_prces(self._dbsess)
+                self._refund.collect_refund_details()
+                self._refund.ask_to_confirm()
+                self._refund.process_refund(self._dbsess)
 
             if run_command == 'Report':
                 self._report.r_date()
