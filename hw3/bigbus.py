@@ -157,7 +157,7 @@ class Seller():
 
 
     def _at_capacity(self, ride_date, route, dbsess):
-        date_sold = dt.datetime.strptime(ride_date, '%m-%d-%Y').date()
+        ride_date = dt.datetime.strptime(ride_date, '%m-%d-%Y').date()
         result = dbsess.query(func.count(Tickets.t_id))\
                        .filter(Tickets.status == 'Active')\
                        .filter(Tickets.ride_date == ride_date)\

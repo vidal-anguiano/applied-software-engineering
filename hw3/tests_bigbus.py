@@ -66,6 +66,9 @@ def test_ticket_sale_processes_successfully():
                     .filter(Tickets.bus_route == 'blue')\
                     .all()
 
-    print(results)
+    ticket = results[0]
 
     assert len(results) % 4 == 0
+    assert ticket.rider_name == 'test_case'
+    assert ticket.ride_date == dt.datetime.strptime('07-02-2019', '%m-%d-%Y').date()
+    assert ticket.bus_route == 'blue'
